@@ -4,10 +4,39 @@
 # ~~~~~~~~~~~~
 # Mass is a tool which supports day to day sysadmin tasks. Simply.
 
+require 'oj'
 require 'yaml'
 require 'aws-sdk'
 require 'awesome_print'
 require 'table_print'
+
+# Simple caching method - just to make sure we don't ping AWS API every time
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def check_if_cached(resource = 'describe_instances_default', flush = false, ec2_connection = nil, check_type = 'describe_instances', instance_id = nil)
+  if flush == false && File.exist?("/tmp/mass-cache-#{resource}.cache")
+    amazon_data = nil
+    File.open("/tmp/mass-cache-#{resource}.cache") do |f|
+      amazon_data = Oj.load(f.read)
+    end
+    return amazon_data
+
+  else
+    # There's no cached data at this stage.
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    data_to_save = nil
+    if check_type == 'describe_instances'
+      data_to_save = ec2_connection.describe_instances[0]
+    else
+      # checking tags
+      data_to_save = ec2_connection.describe_tags(:filters => [{ :name => 'resource-id', :values => [instance_id] }])[0]
+    end
+    File.open("/tmp/mass-cache-#{resource}.cache", 'w') do |f|
+       f.write Oj.dump(data_to_save)
+    end
+    check_if_cached(resource, flush, ec2_connection, check_type)
+  end
+end
 
 aws_config = YAML.load_file(ENV['HOME'] + '/.config.yaml')
 instances_data = Array.new
@@ -19,22 +48,29 @@ aws_config['provider_zones'].each do |provider|
     :access_key_id      => aws_config['provider_zones'][provider[0]]['aws_access_key_id'],
     :secret_access_key  => aws_config['provider_zones'][provider[0]]['aws_secret_access_key']
     )
-  ec2.describe_instances.each do |reservations|
-    reservations['reservations'].each do |instances|
+
+  described_instances = check_if_cached("describe_instances_#{provider[0]}", false, ec2, 'describe_instances')
+
+  described_instances.each do |instances|
       instances['instances'].each do |i|
+        hostname = ""
+
+        # Getting information about tags
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         tags = Array.new
-        ec2.describe_tags(:filters => [{ :name => 'resource-id', :values => [i.instance_id] }]).each do |tag_array|
+        described_tags = check_if_cached("describe_tags_instance_#{i.instance_id}", false, ec2, 'describe_tags', i.instance_id)
+        # ec2.describe_tags(:filters => [{ :name => 'resource-id', :values => [i.instance_id] }]).each do |tag_array|
+        described_tags.each do |tag|
           app_tags = Array.new
           env_tags = Array.new
-          tag_array.each do |tag_list|
-            tag_list['tags'].each do |tag|
-              if tag.key == "App"
-                app_tags.push(tag.value.downcase)
-              end
-              if tag.key == "Env"
-                env_tags.push(tag.value.downcase)
-              end
-            end
+          if tag.key == "App"
+            app_tags.push(tag.value.downcase)
+          end
+          if tag.key == "Env"
+            env_tags.push(tag.value.downcase)
+          end
+          if tag.key == "Name"
+            hostname = tag.value.downcase
           end
           if app_tags.length > 0
             tags.push("Apps: #{app_tags.join(',')}")
@@ -44,8 +80,11 @@ aws_config['provider_zones'].each do |provider|
           end
         end
 
+        # Building hash with information for instance
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         tmp_data = {
           :account          => provider[0],
+          :hostname         => hostname,
           :instance_id      => i.instance_id,
           :status           => i.state.name,
           :instance_az      => i.placement.availability_zone,
@@ -57,7 +96,6 @@ aws_config['provider_zones'].each do |provider|
         instances_data.push(tmp_data)
       end
     end
-  end
 end
 
 tp.set :max_width, 120

@@ -2,4 +2,5 @@ source 'https://rubygems.org'
 
 gem 'aws-sdk', '~> 2'
 gem 'awesome_print'
-gem 'terminal-table'
+gem 'table_print'
+gem 'oj'
