@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+# What's mass?
+# ~~~~~~~~~~~~
+# Mass is a tool which supports day to day sysadmin tasks. Simply.
+
+require 'yaml'
+require 'aws-sdk'
+require 'awesome_print'
+require 'table_print'
+
+aws_config = YAML.load_file(ENV['HOME'] + '/.config.yaml')
+instances_data = Array.new
+
+aws_config['provider_zones'].each do |provider|
+  # ap aws_config['provider_zones'][provider[0]]['aws_access_key_id']
+  ec2 = Aws::EC2::Client.new(
+    :region             => 'eu-west-1',
+    :access_key_id      => aws_config['provider_zones'][provider[0]]['aws_access_key_id'],
+    :secret_access_key  => aws_config['provider_zones'][provider[0]]['aws_secret_access_key']
+    )
+  ec2.describe_instances.each do |reservations|
+    reservations['reservations'].each do |instances|
+      instances['instances'].each do |i|
+        tags = Array.new
+        ec2.describe_tags(:filters => [{ :name => 'resource-id', :values => [i.instance_id] }]).each do |tag_array|
+          app_tags = Array.new
+          env_tags = Array.new
+          tag_array.each do |tag_list|
+            tag_list['tags'].each do |tag|
+              if tag.key == "App"
+                app_tags.push(tag.value.downcase)
+              end
+              if tag.key == "Env"
+                env_tags.push(tag.value.downcase)
+              end
+            end
+          end
+          if app_tags.length > 0
+            tags.push("Apps: #{app_tags.join(',')}")
+          end
+          if env_tags.length > 0
+            tags.push("Env: #{env_tags.join(',')}")
+          end
+        end
+
+        tmp_data = {
+          :account          => provider[0],
+          :instance_id      => i.instance_id,
+          :status           => i.state.name,
+          :instance_az      => i.placement.availability_zone,
+          :size             => i.instance_type,
+          :private_ip       => i.private_ip_address,
+          :public_ip        => i.public_ip_address,
+          :instance_tags    => tags.join(" / ")
+        }
+        instances_data.push(tmp_data)
+      end
+    end
+  end
+end
+
+tp.set :max_width, 120
+tp instances_data
