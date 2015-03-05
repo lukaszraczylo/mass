@@ -1,0 +1,8 @@
+provider_zones:
+  first_account:
+    aws_access_key_id: 'myKey'
+    aws_secret_access_key: 'mySecret'
+    default: 'true'
+  second_account:
+    aws_access_key_id: 'myKey2'
+    aws_secret_access_key: 'mySecret2'
