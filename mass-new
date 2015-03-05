@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+# Mass - A DevOps thingy.
+# ~~~~~~~~~~~~~~~~~~~~~~~
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
+
+require 'yaml'
+require 'awesome_print'
+
+# Project specific modules
+require 'printer'
+require 'parameters'
+require 'configuration'
+
+$version = '0.1'
+
+class Mass
+  def initialize
+    # Setting up global variables for configuration and parameters.
+    # Those variables are available from all other modules and libraries
+    # within this program.
+    $params = Parameters.parse
+    $config = Configuration.parse
+  end
+end
+
+if (__FILE__ == $0)
+  m = Mass.new
+end
