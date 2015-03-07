@@ -19,6 +19,7 @@ Usage:
 where [options] are:
 EOS
       opt :config, "Configuration file path. If non specified - using ~/.config.yaml", :type => :string
+      opt :filter, "Filtering results. Please refer to README.md for filters documentation.", :type => :string
       opt :debug, "Debug and its level. Lower debug level equals to less information printed.", :default => 0
     end
 

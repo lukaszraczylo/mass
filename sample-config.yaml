@@ -1,8 +1,12 @@
 provider_zones:
   first_account:
+    cloud: 'aws'
+    region: 'eu-west-1'
     aws_access_key_id: 'myKey'
     aws_secret_access_key: 'mySecret'
     default: 'true'
   second_account:
+    cloud: 'aws'
+    region: 'eu-west-1'
     aws_access_key_id: 'myKey2'
     aws_secret_access_key: 'mySecret2'

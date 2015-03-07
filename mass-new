@@ -9,19 +9,25 @@ require 'yaml'
 require 'awesome_print'
 
 # Project specific modules
+require 'cloud'
 require 'printer'
 require 'parameters'
 require 'configuration'
 
 $version = '0.1'
+$connections = Hash.new
 
 class Mass
   def initialize
     # Setting up global variables for configuration and parameters.
     # Those variables are available from all other modules and libraries
     # within this program.
-    $params = Parameters.parse
-    $config = Configuration.parse
+    $params       = Parameters.parse
+    $config       = Configuration.parse
+
+    # At this stage we can connect to cloud of our choice
+    Cloud.connect
+    # Actually doing something
   end
 end
 
