@@ -1,10 +1,15 @@
 #!/bin/bash -e
 echo "Installing / Updating mass tool"
-cd /tmp
-git clone https://github.com/lukaszraczylo/mass.git
-cd /tmp/mass
+LIB_DIRECTORY=/usr/local/lib/mass
+BIN_DIRECTORY=/usr/local/bin
+rm -f $BIN_DIRECTORY/mass
+if [ ! -d "$LIB_DIRECTORY" ]; then
+  git clone https://github.com/lukaszraczylo/mass.git $LIB_DIRECTORY
+else
+  cd $LIB_DIRECTORY
+  git pull --rebase
+fi
+cd $LIB_DIRECTORY
 bundle install
-cp mass/installer.sh /usr/local/bin/mass-updater
-cp mass/mass /usr/local/bin/mass
-chmod +x /usr/local/bin/mass*
-rm -fr /tmp/mass
+cp installer.sh $BIN_DIRECTORY/mass-updater && chmod +x $BIN_DIRECTORY/mass-updater
+ln -s $LIB_DIRECTORY/mass $BIN_DIRECTORY/mass

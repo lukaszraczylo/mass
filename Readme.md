@@ -10,26 +10,28 @@ Feel free to submit new PRs as it's my side project :P
 * to upgrade run mass-updater ( it's an installer but moved to /usr/local/bin )
 
 ### Configuration
-You can add as many provider_zones as you want. Drop all the configuration in **~/.config.yaml**
+You can add as many provider_zones as you want. Drop all the configuration in **~/.config.yaml** or file of your choice which can be specified with --config switch.
 
 ```
 provider_zones:
   first_account:
     aws_access_key_id: 'myKey'
     aws_secret_access_key: 'mySecret'
-    default: 'true'
+    cloud: 'aws'
+    region: 'eu-west-1'
   second_account:
+    cloud: 'aws'
+    region: 'eu-west-1'
     aws_access_key_id: 'myKey2'
     aws_secret_access_key: 'mySecret2'
 ```
 
 ### Running
 
+Use following to show usage info
 ```
-$ mass
+$ mass -h
 ```
-
-Returns list of instances added to your accounts.
 
 ### Roadmap
 
