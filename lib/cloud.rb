@@ -30,7 +30,7 @@ module Cloud
     servers_list = self.check_if_cached("instances_#{conn[0]}_#{conn[1][:cloud]}", false, conn, 'describe_instances')
     servers_list.each do |instances|
       instances['instances'].each do |i|
-        Printer.print('debug', "Found instance: #{i.instance_id}")
+        Printer.print('debug', "Found instance: #{i.instance_id}", 3)
         hostname  = ""
         tags      = Array.new
         described_tags = self.check_if_cached("tags_#{conn[0]}_#{conn[1][:cloud]}_#{i.instance_id}", false, conn, 'describe_tags', i.instance_id)
