@@ -9,13 +9,12 @@ module Parameters
   # Actions based on parameters
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def self.act
-    if $params.filter != nil
-      Printer.print('debug', "Returns only filtered information. Filter: #{$params.filter}", 3)
-      # Engaging our filters
-    else
-      # Printing out simple table with all the instances
-      Cloud.get_all_the_information
+    # If no parameters specified it defaults to --all
+    if ( ! $params.filter && ! $params.cloud && ! $params.account )
+      $params[:all] = true
     end
+    # Gathering information
+    Cloud.get_all_the_information
   end
 
   # Parsing parameters
