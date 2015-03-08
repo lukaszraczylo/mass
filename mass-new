@@ -25,9 +25,10 @@ class Mass
     $params       = Parameters.parse
     $config       = Configuration.parse
 
-    # At this stage we can connect to cloud of our choice
+    # At this stage we can connect to cloud of our choice, or at least try to
     Cloud.connect
     # Actually doing something
+    Parameters.act
   end
 end
 

@@ -23,4 +23,44 @@ module Cloud
       $connections.merge!( provider[0] => { :region => provider[1]['region'], :cloud => provider[1]['cloud'], :connector => connection } )
     end
   end
+
+  # Returns all the information
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  def self.get_all_the_information
+    Printer.print('debug', 'Trying to get information about all the instances', 3)
+    ap $params
+    $connections.each do |conn|
+      if $params.cloud && conn[1][:cloud] == $params.cloud && $params.account == nil
+        # Using only information from the cloud specified.
+        Printer.print('debug', "Printing instances from specified cloud: #{$params.cloud}", 5)
+      elsif $params.account && conn[0] == $params.account
+        # Displaying all the servers using specified account.
+        Printer.print('debug', "Printing instances from specified account: #{$params.account}", 5)
+      elsif $params.all == true
+        # Display all the information from all accounts and clouds.
+        # Heads up: It will take a while if you have more than 50 instances.
+        Printer.print('debug', 'Printing instances from all the accounts and clouds', 5)
+      end
+    end
+  end
+
+  # Caching results
+  # ~~~~~~~~~~~~~~~
+  # Using dummy file based cache to store all the results
+  def self.cache_results(resource = 'describe_instances', flush = false,
+    cloud_connector = nil, check_type = 'describe_instances', instance_id = nil)
+    cloud_data = nil
+    cache_dir = '/var/tmp'
+    # Information is cached and we don't want to flush it.
+    if flush == false && File.exists("#{cache_dir}/mass-#{resource}.cache")
+      Printer.print('debug', "Found information about #{resource} in cache.", 5)
+    # Information isn't cached or we just flushed it.
+    else
+      File.open("#{cache_dir}/mass-#{resource}.cache", 'w') do |f|
+        Printer.print('debug', "Saving cache information for #{resource}", 5)
+        # f.write Oj.dump(data_to_save)
+      end
+      self.cache_results(resource, flush, cloud_connector, check_type)
+    end
+  end
 end
