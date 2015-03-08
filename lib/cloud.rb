@@ -28,7 +28,6 @@ module Cloud
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def self.get_all_the_information
     Printer.print('debug', 'Trying to get information about all the instances', 3)
-    ap $params
     $connections.each do |conn|
       if $params.cloud_given && conn[1][:cloud] == $params.cloud
         # Using only information from the cloud specified.
@@ -36,6 +35,8 @@ module Cloud
       elsif $params.account_given && conn[0] == $params.account
         # Displaying all the servers using specified account.
         Printer.print('debug', "Printing instances from specified account: #{$params.account}", 5)
+      elsif $params.region_given && conn[1][:region] == $params.region
+        Printer.print('debug', "Printing instances from specified region: #{$params.region}", 5)
       elsif $params.all == true
         # Display all the information from all accounts and clouds.
         # Heads up: It will take a while if you have more than 50 instances.
@@ -54,8 +55,13 @@ module Cloud
     # Information is cached and we don't want to flush it.
     if flush == false && File.exists("#{cache_dir}/mass-#{resource}.cache")
       Printer.print('debug', "Found information about #{resource} in cache.", 5)
+      File.open("#{cache_dir}/mass-#{resource}.cache") do |f|
+        cloud_data = Oj.load(f.read)
+      end
+      return amazon_data
     # Information isn't cached or we just flushed it.
     else
+      data_to_save = nil
       File.open("#{cache_dir}/mass-#{resource}.cache", 'w') do |f|
         Printer.print('debug', "Saving cache information for #{resource}", 5)
         # f.write Oj.dump(data_to_save)

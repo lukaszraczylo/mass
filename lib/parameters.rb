@@ -34,6 +34,7 @@ EOS
       opt :debug, "Debug and its level. Lower debug level equals to less information printed.", :default => 0
       opt :cloud, "Cloud service you'd like to use. Must comply with your settings file.", :type => :string
       opt :account, "Cloud account set in your configuration file", :type => :string
+      opt :region, "Cloud account region to use", :type => :string
       opt :all, "Show all the accounts, no filtering, no accounts and clouds separation."
     end
 
