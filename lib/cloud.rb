@@ -30,10 +30,10 @@ module Cloud
     Printer.print('debug', 'Trying to get information about all the instances', 3)
     ap $params
     $connections.each do |conn|
-      if $params.cloud && conn[1][:cloud] == $params.cloud && $params.account == nil
+      if $params.cloud_given && conn[1][:cloud] == $params.cloud
         # Using only information from the cloud specified.
         Printer.print('debug', "Printing instances from specified cloud: #{$params.cloud}", 5)
-      elsif $params.account && conn[0] == $params.account
+      elsif $params.account_given && conn[0] == $params.account
         # Displaying all the servers using specified account.
         Printer.print('debug', "Printing instances from specified account: #{$params.account}", 5)
       elsif $params.all == true
