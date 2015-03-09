@@ -36,3 +36,5 @@ $ mass -h
 ### Roadmap
 
 * filtering list of instances by any field
+* add filtering by region
+* make SSH switch work

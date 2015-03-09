@@ -12,6 +12,9 @@ module Cloud
   def self.connect
     # Iterating through all settings from the config file
     $config['provider_zones'].each do |provider|
+      if provider[1]['cloud'].nil?
+        Printer.print('error', "Invalid config file for #{provider[0]} - missing cloud definition.")
+      end
       if provider[1]['cloud'].downcase == 'aws'
         connection = Aws::EC2::Client.new(
             :region             => provider[1]['region'],
@@ -33,7 +36,40 @@ module Cloud
         Printer.print('debug', "Found instance: #{i.instance_id}", 3)
         hostname  = ""
         tags      = Array.new
+        env_tags  = Array.new
+        app_tags  = Array.new
         described_tags = self.check_if_cached("tags_#{conn[0]}_#{conn[1][:cloud]}_#{i.instance_id}", false, conn, 'describe_tags', i.instance_id)
+        described_tags.each do |tag|
+          if tag.key == "Name"
+            hostname = tag.value.downcase
+          elsif tag.key =~ /^env.*/
+            env_tags.push(tag.value.downcase)
+          elsif tag.key =~ /^app.*/
+            app_tags.push(tag.value.downcase)
+          else
+            tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
+          end
+        end
+        # Joining collected tags
+        if app_tags.length > 0
+          tags.push("Apps: #{app_tags.join(',')}")
+        end
+        if env_tags.length > 0
+          tags.push("Env: #{env_tags.join(',')}")
+        end
+
+        tmp_data = {
+          :account          => conn[0],
+          :hostname         => hostname,
+          :instance_id      => i.instance_id,
+          :status           => i.state.name,
+          :instance_az      => i.placement.availability_zone,
+          :size             => i.instance_type,
+          :private_ip       => i.private_ip_address,
+          :public_ip        => i.public_ip_address,
+          :instance_tags    => tags.join(" / ")
+        }
+        $instances_data.push(tmp_data)
       end
     end
     # ap servers_list
@@ -43,6 +79,7 @@ module Cloud
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def self.get_all_the_information
     Printer.print('debug', 'Trying to get information about all the instances', 3)
+    $instances_data = Array.new
     $connections.each do |conn|
       if $params.cloud_given && conn[1][:cloud] == $params.cloud
         # Using only information from the cloud specified.
@@ -58,8 +95,10 @@ module Cloud
       elsif $params.all == true
         # Display all the information from all accounts and clouds.
         # Heads up: It will take a while if you have more than 50 instances.
-        Printer.print('debug', 'Printing instances from all the accounts and clouds', 5)
+        Printer.print('debug', "Printing instances from all the accounts and clouds for account: #{conn[0]}", 5)
         self.cloud_get_all(conn)
+      else
+        Printer.print('debug', "Empty result set - there\'s nothing there.", 3)
       end
     end
   end
