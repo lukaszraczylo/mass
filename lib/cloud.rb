@@ -52,10 +52,10 @@ module Cloud
         end
         # Joining collected tags
         if app_tags.length > 0
-          tags.push("Apps: #{app_tags.join(',')}")
+          tags.push("apps: #{app_tags.join(',')}")
         end
         if env_tags.length > 0
-          tags.push("Env: #{env_tags.join(',')}")
+          tags.push("env: #{env_tags.join(',')}")
         end
 
         tmp_data = {

@@ -4,7 +4,7 @@ LIB_DIRECTORY=/usr/local/lib/mass
 BIN_DIRECTORY=/usr/local/bin
 rm -f $BIN_DIRECTORY/mass
 if [ ! -d "$LIB_DIRECTORY" ]; then
-  git clone https://github.com/lukaszraczylo/mass.git $LIB_DIRECTORY
+  git clone -b master https://github.com/lukaszraczylo/mass.git $LIB_DIRECTORY
 else
   cd $LIB_DIRECTORY
   git pull --rebase

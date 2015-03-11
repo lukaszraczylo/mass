@@ -17,15 +17,15 @@ module Parameters
     # Gathering information
     Cloud.get_all_the_information
 
-    if ( ! $params.ssh && ! $params.raw )
+    if ( ! $params.ssh_given && ! $params.raw_given )
       Printer.print('debug', 'Printing out table with results.', 5)
       tp.set :max_width, 120
       tp $instances_data
 
-    elsif ( $params.raw )
-      Printer.print('debug', 'Printing out ";;" separated results.')
+    elsif ( $params.raw_given )
+      Printer.print('debug', "Printing out \"#{$params.raw}\" separated results.")
       $instances_data.each do |line|
-        puts line.values.join(';;')
+        puts line.values.join($params.raw)
       end
     end
   end
@@ -48,7 +48,7 @@ EOS
       opt :config, "Configuration file path. If non specified - using ~/.config.yaml", :type => :string
       opt :debug, "Debug and its level. Lower debug level equals to less information printed.", :default => 0
       opt :filter, "Filtering results. Please refer to README.md for filters documentation.", :type => :string
-      opt :raw, "Printing out without tables, ';;' separated for easier parsing."
+      opt :raw, "Printing out without tables, separator of your choice.", :type => :string, :default => ';;'
       opt :region, "Cloud account region to use", :type => :string
       opt :ssh, "Open SSH connection to all the results"
     end

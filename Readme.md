@@ -31,6 +31,27 @@ provider_zones:
 Use following to show usage info
 ```
 $ mass -h
+
+Mass is a simple tool for DevOps created to make cloud infrastructure
+management easy.
+Usage:
+      $ mass [options]
+
+where [options] are:
+  -a, --all            Show all the accounts, no filtering, no accounts and
+                       clouds separation.
+  -c, --account=<s>    Cloud account set in your configuration file
+  -l, --cloud=<s>      Cloud service you'd like to use. Must comply with your
+                       settings file.
+  -o, --config=<s>     Configuration file path. If non specified - using
+                       ~/.config.yaml
+  -d, --debug=<i>      Debug and its level. Lower debug level equals to less
+                       information printed. (Default: 0)
+  -r, --raw=<s>        Printing out without tables, separator of your choice.
+                       (Default: ;;)
+  -e, --region=<s>     Cloud account region to use
+  -v, --version        Print version and exit
+  -h, --help           Show this message
 ```
 
 ### Roadmap
