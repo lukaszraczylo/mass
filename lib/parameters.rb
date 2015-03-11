@@ -22,6 +22,24 @@ module Parameters
       tp.set :max_width, 120
       tp $instances_data
 
+    elsif ( $params.ssh_given )
+      cmd = ""
+      $instances_data.each do |instance|
+        # Using external IP to connect to host
+        if $params.external_given && instance[:public_ip] != nil
+          cmd << " #{instance[:public_ip]}"
+          Printer.print('debug', "Found a public ip #{instance[:public_ip]} for instance #{instance[:instance_id]}", 5)
+        elsif $params.internal_given
+          cmd << " #{instance[:private_ip]}"
+          Printer.print('debug', "Found a private ip #{instance[:private_ip]} for instance #{instance[:instance_id]}", 5)
+        else
+          Printer.print('warning', "Instance #{instance[:instance_id]} doesn't have external IP assigned. Ignoring.")
+        end
+      end
+      Printer.print('debug', "Starting CsshX with following hosts: #{cmd}")
+      Printer.print('success', "Please check your terminal ( no iTerm2 ) window for ssh sessions.")
+      `csshx --sorthosts #{cmd}`
+
     elsif ( $params.raw_given )
       Printer.print('debug', "Printing out \"#{$params.raw}\" separated results.")
       $instances_data.each do |line|
@@ -50,6 +68,8 @@ EOS
       opt :filter, "Filtering results. Please refer to README.md for filters documentation.", :type => :string
       opt :raw, "Printing out without tables, separator of your choice.", :type => :string, :default => ';;'
       opt :region, "Cloud account region to use", :type => :string
+      opt :external, "Use external IP ( for SSH )", :default => false
+      opt :internal, "Use internal IP ( for SSH )", :default => true
       opt :ssh, "Open SSH connection to all the results"
     end
 

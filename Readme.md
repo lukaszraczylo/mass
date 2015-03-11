@@ -32,30 +32,27 @@ Use following to show usage info
 ```
 $ mass -h
 
-Mass is a simple tool for DevOps created to make cloud infrastructure
-management easy.
+Mass is a simple tool for DevOps created to make cloud infrastructure management easy.
 Usage:
       $ mass [options]
 
 where [options] are:
-  -a, --all            Show all the accounts, no filtering, no accounts and
-                       clouds separation.
-  -c, --account=<s>    Cloud account set in your configuration file
-  -l, --cloud=<s>      Cloud service you'd like to use. Must comply with your
-                       settings file.
-  -o, --config=<s>     Configuration file path. If non specified - using
-                       ~/.config.yaml
-  -d, --debug=<i>      Debug and its level. Lower debug level equals to less
-                       information printed. (Default: 0)
-  -r, --raw=<s>        Printing out without tables, separator of your choice.
-                       (Default: ;;)
-  -e, --region=<s>     Cloud account region to use
-  -v, --version        Print version and exit
-  -h, --help           Show this message
+  -a, --all                        Show all the accounts, no filtering, no accounts and clouds separation.
+  -c, --account=<s>                Cloud account set in your configuration file
+  -l, --cloud=<s>                  Cloud service you'd like to use. Must comply with your settings file.
+  -o, --config=<s>                 Configuration file path. If non specified - using ~/.config.yaml
+  -d, --debug=<i>                  Debug and its level. Lower debug level equals to less information printed. (Default: 0)
+  -f, --filter=<s>                 Filtering results. Please refer to README.md for filters documentation.
+  -r, --raw=<s>                    Printing out without tables, separator of your choice. (Default: ;;)
+  -e, --region=<s>                 Cloud account region to use
+  -x, --external                   Use external IP ( for SSH )
+  -i, --internal, --no-internal    Use internal IP ( for SSH ) (default: true)
+  -s, --ssh                        Open SSH connection to all the results
+  -v, --version                    Print version and exit
+  -h, --help                       Show this message
 ```
 
 ### Roadmap
 
 * filtering list of instances by any field
 * add filtering by region
-* make SSH switch work
