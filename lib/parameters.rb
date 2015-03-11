@@ -11,7 +11,7 @@ module Parameters
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def self.act
     # If no parameters specified it defaults to --all
-    if ( ! $params.filter && ! $params.cloud && ! $params.account  && ! $params.region )
+    if ( ! $params.filter_given && ! $params.cloud && ! $params.account  && ! $params.region )
       $params[:all] = true
     end
     # Gathering information
@@ -68,7 +68,7 @@ EOS
       opt :filter, "Filtering results. Please refer to README.md for filters documentation.", :type => :string
       opt :raw, "Printing out without tables, separator of your choice.", :type => :string, :default => ';;'
       opt :region, "Cloud account region to use", :type => :string
-      opt :external, "Use external IP ( for SSH )", :default => false
+      opt :external, "Use external IP ( for SSH and listing )", :default => false
       opt :internal, "Use internal IP ( for SSH )", :default => true
       opt :ssh, "Open SSH connection to all the results"
     end

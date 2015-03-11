@@ -6,6 +6,15 @@
 
 require 'aws-sdk'
 
+class Hash
+  def grep(pattern)
+    inject([]) do |res, kv|
+      res << kv if kv[0] =~ pattern or kv[1] =~ pattern
+      res
+    end
+  end
+end
+
 module Cloud
   # Serves connection, returns hash of successful connections in format
   #   { 'provider_name', 'connector }'
@@ -25,6 +34,31 @@ module Cloud
       Printer.print('debug', "Connected to #{provider[0]}\t cloud: #{provider[1]['cloud']}, region: #{provider[1]['region']}", 4)
       $connections.merge!( provider[0] => { :region => provider[1]['region'], :cloud => provider[1]['cloud'], :connector => connection } )
     end
+  end
+
+  # Get filtered information
+  # ~~~~~~~~~~~~~~~~~~~~~~~~
+  def self.cloud_get_filtered(conn)
+    self.cloud_get_all(conn)
+    tmp_results = Array.new
+    $instances_data.each do |i|
+      checks_passed = 0
+      all_the_filters = $params.filter.split(',,')
+      all_the_filters.each do |f|
+        begin
+          if i[f.split('::')[0].to_sym] =~ Regexp.new(f.split('::')[1])
+            checks_passed += 1
+            Printer.print('debug', "Found instance #{i[:instance_id]} matching filter.", 5)
+          end
+        rescue
+          Printer.print('debug', "Something went wrong with checks of #{i[:instance_id]}", 5)
+        end
+      end
+      if checks_passed == all_the_filters.size
+        tmp_results.push(i)
+      end
+    end
+    $instances_data = tmp_results.uniq
   end
 
   # Get non-filtered information
@@ -72,7 +106,6 @@ module Cloud
         $instances_data.push(tmp_data)
       end
     end
-    # ap servers_list
   end
 
   # Returns all the information
@@ -84,19 +117,19 @@ module Cloud
       if $params.cloud_given && conn[1][:cloud] == $params.cloud
         # Using only information from the cloud specified.
         Printer.print('debug', "Printing instances from specified cloud: #{$params.cloud}", 5)
-        self.cloud_get_all(conn)
+        $params.filter_given ? self.cloud_get_filtered(conn) : self.cloud_get_all(conn)
       elsif $params.account_given && conn[0] == $params.account
         # Displaying all the servers using specified account.
         Printer.print('debug', "Printing instances from specified account: #{$params.account}", 5)
-        self.cloud_get_all(conn)
+        $params.filter_given ? self.cloud_get_filtered(conn) : self.cloud_get_all(conn)
       elsif $params.region_given && conn[1][:region] == $params.region
         Printer.print('debug', "Printing instances from specified region: #{$params.region}", 5)
-        self.cloud_get_all(conn)
+        $params.filter_given ? self.cloud_get_filtered(conn) : self.cloud_get_all(conn)
       elsif $params.all == true
         # Display all the information from all accounts and clouds.
         # Heads up: It will take a while if you have more than 50 instances.
         Printer.print('debug', "Printing instances from all the accounts and clouds for account: #{conn[0]}", 5)
-        self.cloud_get_all(conn)
+        $params.filter_given ? self.cloud_get_filtered(conn) : self.cloud_get_all(conn)
       else
         Printer.print('debug', "Empty result set - there\'s nothing there.", 3)
       end

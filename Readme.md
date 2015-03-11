@@ -6,6 +6,8 @@ Feel free to submit new PRs as it's my side project :P
 
 ### Installation
 
+I assume you have homebrew and some recent version of ruby interpreter together with ruby gems installed.
+
 * run ./installer.sh
 * to upgrade run mass-updater ( it's an installer but moved to /usr/local/bin )
 
@@ -52,7 +54,21 @@ where [options] are:
   -h, --help                       Show this message
 ```
 
+
+### Examples
+
+#### Filtering by field ( woohoo, regexp power! )
+```
+mass --account potato --filter "size::.*micro"
+mass --account banana --filter "hostname::^master.*" -d
+```
+
+#### Filtering by multiple fields
+```
+mass --account minions --filter "size::.*micro,,hostname::natbox"
+```
+
 ### Roadmap
 
-* filtering list of instances by any field
 * add filtering by region
+* fix displaying filters even when different cloud is specified
