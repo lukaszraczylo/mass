@@ -71,6 +71,7 @@ EOS
       opt :external, "Use external IP ( for SSH and listing )", :default => false
       opt :internal, "Use internal IP ( for SSH )", :default => true
       opt :ssh, "Open SSH connection to all the results"
+      opt :clearcache, "Flush cache for specified result set", :default => false
     end
 
     # Returning debug as it's the one whe are most interested in
