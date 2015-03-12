@@ -19,7 +19,7 @@ module Parameters
 
     if ( ! $params.ssh_given && ! $params.raw_given )
       Printer.print('debug', 'Printing out table with results.', 5)
-      tp.set :max_width, 120
+      tp.set :max_width, $params.width
       tp $instances_data
 
     elsif ( $params.ssh_given )
@@ -71,7 +71,8 @@ EOS
       opt :external, "Use external IP ( for SSH and listing )", :default => false
       opt :internal, "Use internal IP ( for SSH )", :default => true
       opt :ssh, "Open SSH connection to all the results"
-      opt :clearcache, "Flush cache for specified result set", :default => false
+      opt :update, "Flush cache for specified result set", :default => false
+      opt :width, "Max columng width", :type => :integer, :default => 120
     end
 
     # Returning debug as it's the one whe are most interested in
