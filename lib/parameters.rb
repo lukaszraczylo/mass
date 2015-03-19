@@ -76,7 +76,7 @@ module Parameters
           end
           Printer.print('debug', "Executing #{toexec}", 3)
           se.keystroke("#{toexec}\n")
-          panel_tmp_counter =+ 1
+          panel_tmp_counter += 1
         end
         se.keystroke("I", :using => [:command_down, :shift_down])
       end
