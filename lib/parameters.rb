@@ -5,6 +5,8 @@
 
 require 'trollop'
 require 'table_print'
+require 'appscript'
+include Appscript
 
 module Parameters
   # Actions based on parameters
@@ -23,25 +25,64 @@ module Parameters
       tp $instances_data
 
     elsif ( $params.ssh_given )
+      commands = Array.new
+      bastion = $params.bastion
       cmd = ""
+      instances_counter = $instances_data.count
       $instances_data.each do |instance|
         # Using external IP to connect to host
+        if instance[:instance_tags] =~ /bastion\:/
+          if ! $params.bastion
+            bastion = instance[:instance_tags].scan(/bastion\:\s(\S+)/)[0][0]
+          end
+        end
+        # If bastion set - we need to add another hop
+        if bastion != nil
+          cmd << "ssh -A -t #{bastion} "
+        end
+        cmd << "ssh -A -t "
         if $params.external_given && instance[:public_ip] != nil
-          cmd << " #{instance[:public_ip]}"
+          cmd << instance[:public_ip]
           Printer.print('debug', "Found a public ip #{instance[:public_ip]} for instance #{instance[:instance_id]}", 5)
         elsif $params.internal_given
-          cmd << " #{instance[:private_ip]}"
+          cmd << instance[:private_ip]
           Printer.print('debug', "Found a private ip #{instance[:private_ip]} for instance #{instance[:instance_id]}", 5)
         else
           Printer.print('warning', "Instance #{instance[:instance_id]} doesn't have external IP assigned. Ignoring.")
         end
+        commands.push(cmd)
+        cmd = ""
       end
-      Printer.print('debug', "Starting CsshX with following hosts: #{cmd}")
-      Printer.print('success', "Please check your terminal ( no iTerm2 ) window for ssh sessions.")
-      `csshx --sorthosts #{cmd}`
+      # Printer.print('debug', "Starting CsshX with following hosts: #{cmd}", 2)
+      # Printer.print('success', "Please check your terminal ( no iTerm2 ) window for ssh sessions.")
+      if instances_counter > 0
+        Printer.print('debug', "We've detected #{instances_counter} results in matching your search.", 5)
+        app("iTerm").activate
+        se = app('System Events')
+        se.keystroke("t", :using => [:command_down])
+        se.keystroke("d", :using => [:command_down])
+        se.keystroke("[", :using => [:command_down])
+        panel_each_side = instances_counter / 2
+        panel_tmp_counter = 0
+        commands.each do |toexec|
+          if panel_tmp_counter == panel_each_side
+            Printer.print('debug', 'Switching to different panel', 5)
+            se.keystroke("]", :using => [:command_down])
+            panel_tmp_counter = 0
+          end
+          if panel_tmp_counter > 0
+            Printer.print('debug', 'Adding another panel to current column', 5)
+            se.keystroke("d", :using => [:command_down, :shift_down])
+          end
+          Printer.print('debug', "Executing #{toexec}", 3)
+          se.keystroke("#{toexec}\n")
+          panel_tmp_counter =+ 1
+        end
+        se.keystroke("I", :using => [:command_down, :shift_down])
+      end
 
     elsif ( $params.raw_given )
-      Printer.print('debug', "Printing out \"#{$params.raw}\" separated results.")
+      Printer.print('debug', "Printing out \"#{$params.raw}\" separated results.", 5)
       $instances_data.each do |line|
         puts line.values.join($params.raw)
       end
@@ -68,6 +109,7 @@ EOS
       opt :filter, "Filtering results. Please refer to README.md for filters documentation.", :type => :string
       opt :raw, "Printing out without tables, separator of your choice.", :type => :string, :default => ';;'
       opt :region, "Cloud account region to use", :type => :string
+      opt :bastion, "Bastion host to tunnel through", :type => :string
       opt :external, "Use external IP ( for SSH and listing )", :default => false
       opt :internal, "Use internal IP ( for SSH )", :default => true
       opt :ssh, "Open SSH connection to all the results"

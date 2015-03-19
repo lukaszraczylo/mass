@@ -47,9 +47,12 @@ where [options] are:
   -f, --filter=<s>                 Filtering results. Please refer to README.md for filters documentation.
   -r, --raw=<s>                    Printing out without tables, separator of your choice. (Default: ;;)
   -e, --region=<s>                 Cloud account region to use
-  -x, --external                   Use external IP ( for SSH )
+  -b, --bastion=<s>                Bastion host to tunnel through
+  -x, --external                   Use external IP ( for SSH and listing )
   -i, --internal, --no-internal    Use internal IP ( for SSH ) (default: true)
   -s, --ssh                        Open SSH connection to all the results
+  -u, --update                     Flush cache for specified result set
+  -w, --width=<i>                  Max columng width (default: 120)
   -v, --version                    Print version and exit
   -h, --help                       Show this message
 ```
@@ -67,6 +70,15 @@ mass --account banana --filter "hostname::^master.*" -d
 ```
 mass --account minions --filter "size::.*micro,,hostname::natbox"
 ```
+
+#### SSH to the hosts using their internal IP
+
+```
+./mass --account=pq_prod --filter 'hostname::(front).*staging.*' --ssh --internal
+```
+
+**bonus** If you need to tunnel your ssh connection via certain host - create following tag for each host you need to tunnel to **bastion**:**IP address or hostname**
+
 
 ### Roadmap
 
