@@ -9,11 +9,15 @@ else
   cd $LIB_DIRECTORY
   git pull --rebase
 fi
-git clone git@github.com:mattneub/appscript.git /tmp/appscript
-cd /tmp/appscript/rb-appscript/trunk
-ruby extconf.rb && make && make install
-gem build rb-appscript.gemspec
-gem install rb-appscript-0.6.1.gem
+
+if [ ! -d "/tmp/appscript" ]; then
+  git clone -b master git@github.com:mattneub/appscript.git /tmp/appscript
+  cd /tmp/appscript/rb-appscript/trunk
+  ruby extconf.rb && make && make install
+  gem build rb-appscript.gemspec
+  gem install rb-appscript-0.6.1.gem
+fi
+
 cd $LIB_DIRECTORY
 bundle install
 cp installer.sh $BIN_DIRECTORY/mass-updater && chmod +x $BIN_DIRECTORY/mass-updater
