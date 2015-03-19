@@ -11,7 +11,7 @@ module Parameters
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def self.act
     # If no parameters specified it defaults to --all
-    if ( ! $params.filter_given && ! $params.cloud && ! $params.account  && ! $params.region )
+    if ( ! $params.cloud && ! $params.account  && ! $params.region )
       $params[:all] = true
     end
     # Gathering information
