@@ -8,5 +8,3 @@ gem 'oj'
 gem 'colorize'
 gem 'trollop'
 gem 'rspec'
-
-gem 'rb-appscript'

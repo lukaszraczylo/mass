@@ -5,8 +5,6 @@
 
 require 'trollop'
 require 'table_print'
-require 'appscript'
-include Appscript
 
 module Parameters
   # Actions based on parameters
@@ -57,28 +55,30 @@ module Parameters
       # Printer.print('success', "Please check your terminal ( no iTerm2 ) window for ssh sessions.")
       if instances_counter > 0
         Printer.print('debug', "We've detected #{instances_counter} results in matching your search.", 5)
-        app("iTerm").activate
-        se = app('System Events')
-        se.keystroke("t", :using => [:command_down])
-        se.keystroke("d", :using => [:command_down])
-        se.keystroke("[", :using => [:command_down])
+        # app("iTerm").activate
+        # se = app('System Events')
+        # se.keystroke("t", :using => [:command_down])
+        # se.keystroke("d", :using => [:command_down])
+        # se.keystroke("[", :using => [:command_down])
         panel_each_side = instances_counter / 2
         panel_tmp_counter = 0
         commands.each do |toexec|
           if panel_tmp_counter == panel_each_side
             Printer.print('debug', 'Switching to different panel', 5)
-            se.keystroke("]", :using => [:command_down])
+            # se.keystroke("]", :using => [:command_down])
+            Printer.print('warning', 'Currently unavailable.')
             panel_tmp_counter = 0
           end
           if panel_tmp_counter > 0
             Printer.print('debug', 'Adding another panel to current column', 5)
-            se.keystroke("d", :using => [:command_down, :shift_down])
+            # se.keystroke("d", :using => [:command_down, :shift_down])
           end
           Printer.print('debug', "Executing #{toexec}", 3)
-          se.keystroke("#{toexec}\n")
+          Printer.print('warning', 'Currently unavailable.')
+          # se.keystroke("#{toexec}\n")
           panel_tmp_counter += 1
         end
-        se.keystroke("I", :using => [:command_down, :shift_down])
+        # se.keystroke("I", :using => [:command_down, :shift_down])
       end
 
     elsif ( $params.raw_given )
