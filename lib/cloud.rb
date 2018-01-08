@@ -5,6 +5,7 @@
 # your cloud provider of choice. By default it enables
 
 require 'aws-sdk'
+require 'awesome_print'
 
 class Hash
   def grep(pattern)
@@ -54,9 +55,7 @@ module Cloud
           Printer.print('debug', "Something went wrong with checks of #{i[:instance_id]}", 5)
         end
       end
-      if checks_passed == all_the_filters.size
-        tmp_results.push(i)
-      end
+      checks_passed == all_the_filters.size ? tmp_results.push(i) : nil
     end
     $instances_data = tmp_results.uniq
   end
@@ -77,22 +76,17 @@ module Cloud
           described_tags.each do |tag|
             if tag.key == "Name"
               hostname = tag.value.downcase
-            elsif tag.key =~ /^env.*/
-              env_tags.push(tag.value.downcase)
-            elsif tag.key =~ /^app.*/
-              app_tags.push(tag.value.downcase)
+            elsif tag.key =~ /^(env|app?(lication)).*/i
+              app_tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
             else
-              tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
+              # Ignore unknown tags
+              #tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
             end
           end
         end
         # Joining collected tags
-        if app_tags.length > 0
-          tags.push("apps: #{app_tags.join(',')}")
-        end
-        if env_tags.length > 0
-          tags.push("env: #{env_tags.join(',')}")
-        end
+        app_tags.length > 0 ? tags.push("#{app_tags.join(', ')}") : nil
+        # env_tags.length > 0 ? tags.push("env: #{env_tags.join(',')}") : nil
 
         tmp_data = {
           :account          => conn[0],
@@ -164,7 +158,8 @@ module Cloud
         end
       elsif check_type == 'describe_tags'
         if cloud_connector[1][:cloud] == 'aws'
-          data_to_save = cloud_connector[1][:connector].describe_tags(:filters => [{ :name => 'resource-id', :values => [instance_id] }])[0]
+          data_to_save = cloud_connector[1][:connector].describe_tags(:filters => [{ :name => 'resource-id', :values => [instance_id] }])[1]
+          data_to_save
         end
       end
       File.open("#{cache_dir}/mass-#{resource}.cache", 'w') do |f|
