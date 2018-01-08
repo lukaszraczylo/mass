@@ -73,15 +73,17 @@ module Cloud
         env_tags  = Array.new
         app_tags  = Array.new
         described_tags = self.check_if_cached("tags_#{conn[0]}_#{conn[1][:cloud]}_#{i.instance_id}", false, conn, 'describe_tags', i.instance_id)
-        described_tags.each do |tag|
-          if tag.key == "Name"
-            hostname = tag.value.downcase
-          elsif tag.key =~ /^env.*/
-            env_tags.push(tag.value.downcase)
-          elsif tag.key =~ /^app.*/
-            app_tags.push(tag.value.downcase)
-          else
-            tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
+        if described_tags != nil
+          described_tags.each do |tag|
+            if tag.key == "Name"
+              hostname = tag.value.downcase
+            elsif tag.key =~ /^env.*/
+              env_tags.push(tag.value.downcase)
+            elsif tag.key =~ /^app.*/
+              app_tags.push(tag.value.downcase)
+            else
+              tags.push("#{tag.key.downcase}: #{tag.value.downcase}")
+            end
           end
         end
         # Joining collected tags
